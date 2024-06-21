@@ -3,29 +3,42 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FaArrowLeft, FaMoneyCheckAlt } from 'react-icons/fa';
 
-
 const TransferMoney = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [amount, setAmount] = useState(0);
     const [receiverId, setReceiverId] = useState('');
     const [customers, setCustomers] = useState([]);
-    
-    useEffect(() => {
-        axios.get('http://localhost:5000/api/customers')
-        .then(response => setCustomers(response.data))
-        .catch(error => console.error(error));
-    }, []);
-    
+    const [sender, setSender] = useState(null);
+    const [receiver, setReceiver] = useState(null);
 
     useEffect(() => {
-        if (customers.length > 0) {
-            const firstReceiver = customers.find(customer => customer._id !== id);
-            if (firstReceiver) {
-                setReceiverId(firstReceiver._id);
-            }
+        
+        axios.get('http://localhost:5000/api/customers')
+            .then(response => {
+                setCustomers(response.data);
+                
+                const firstReceiver = response.data.find(customer => customer._id !== id);
+                if (firstReceiver) {
+                    setReceiverId(firstReceiver._id);
+                }
+            })
+            .catch(error => console.error(error));
+
+        
+        axios.get(`http://localhost:5000/api/customers/${id}`)
+            .then(response => setSender(response.data))
+            .catch(error => console.error(error));
+    }, [id]);
+
+    useEffect(() => {
+        if (receiverId) {
+            
+            axios.get(`http://localhost:5000/api/customers/${receiverId}`)
+                .then(response => setReceiver(response.data))
+                .catch(error => console.error(error));
         }
-    }, [customers, id]);
+    }, [receiverId]);
 
     const handleTransfer = () => {
         axios.post('http://localhost:5000/api/customers/transfer', {
@@ -34,11 +47,15 @@ const TransferMoney = () => {
             amount,
         })
             .then(() => {
-                alert(`Transferred $${amount} from Customer ${id} to Customer ${receiverId}`);
+                alert(`Transferred $${amount} from ${sender.name} to ${receiver.name}`);
                 navigate('/customers');
             })
             .catch(error => console.error(error));
     };
+
+    if (!sender) {
+        return <div>Loading...</div>;
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-indigo-300 to-indigo-50 flex items-center justify-center">
@@ -46,7 +63,7 @@ const TransferMoney = () => {
                 <Link to={`/customer/${id}`} className="text-purple-500 flex items-center mb-6 hover:text-purple-700 transition">
                     <FaArrowLeft className="mr-2" /> Back to Customer Details
                 </Link>
-                <h1 className="text-3xl font-extrabold text-gray-900 mb-8 text-center">Transfer Money from {id}</h1>
+                <h1 className="text-3xl font-extrabold text-gray-900 mb-8 text-center">Transfer Money from {sender.name}</h1>
                 <div className="mb-4">
                     <label className="block text-gray-700 text-lg font-semibold mb-2">Amount:</label>
                     <input
@@ -64,7 +81,7 @@ const TransferMoney = () => {
                         className="w-full px-4 py-2 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
                     >
                         {customers
-                            .filter((customer) => customer._id !== parseInt(id))
+                            .filter((customer) => customer._id !== id)
                             .map((customer) => (
                                 <option key={customer._id} value={customer._id}>
                                     {customer.name}

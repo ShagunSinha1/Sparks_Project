@@ -5,7 +5,7 @@ import { FaArrowLeft, FaMoneyCheckAlt } from 'react-icons/fa';
 
 const CustomerDetails = () => {
     console.log()
-    const { id } = useParams(); // Extract customer ID from URL
+    const { id } = useParams(); 
     const [customer, setCustomer] = useState(null);
     const [loading, setLoading] = useState(true);
 

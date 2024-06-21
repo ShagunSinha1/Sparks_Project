@@ -10,25 +10,24 @@ const AddCustomer = () => {
     const navigate = useNavigate();
 
     const handleSubmit = async (event) => {
-        event.preventDefault(); // Prevent default form submission
+        event.preventDefault(); 
 
         try {
             
-            // Perform API call to add new customer
             const response = await axios.post('http://localhost:5000/api/customers', {
                 name,
-                balance: Number(balance), // Ensure balance is converted to a number
+                balance: Number(balance), 
                 email,
-                phone_no: phoneNo // Ensure balance is converted to a number
+                phone_no: phoneNo 
             });
 
-            console.log(response.data); // Log response data for debugging
+            console.log(response.data); 
 
             alert('Customer added successfully');
-            navigate('/customers'); // Navigate to customers list page after successful submission
+            navigate('/customers'); 
         } catch (error) {
             console.error('Error adding customer:', error);
-            alert('Failed to add customer. Please try again.'); // Display error message to user
+            alert('Failed to add customer. Please try again.'); 
         }
     };
 
